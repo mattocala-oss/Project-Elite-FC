@@ -1161,4 +1161,240 @@ const HistoryView = ({ history, setHistory, setView, formatDate }) => {
 };
 
 const GameLogModal = ({ saveGameStats, setIsGameLogOpen, isDefensive }) => {
-    const [stats, setStats] = useState({ goals
+    const [stats, setStats] = useState({ goals: 0, assists: 0, cleanSheet: false, result: 'Win', homeScore: 0, awayScore: 0 });
+    const [matchDate, setMatchDate] = useState(new Date().toISOString().split('T')[0]);
+
+    return (
+      <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-6 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm overflow-y-auto max-h-[90vh]">
+              <h3 className="text-xl font-bold text-white mb-6 text-center italic">Match Report</h3>
+              <div className="space-y-4 mb-6">
+                  <div className="flex flex-col gap-1 mb-2">
+                      <label className="text-[10px] uppercase font-bold text-zinc-500">Match Date</label>
+                      <div className="relative">
+                          <input type="date" value={matchDate} onChange={(e) => setMatchDate(e.target.value)} className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 text-white text-sm font-bold focus:border-emerald-500 outline-none appearance-none" />
+                          <CalendarDays className="absolute right-3 top-3 text-zinc-500 pointer-events-none" size={18} />
+                      </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                      {['Win', 'Draw', 'Loss'].map(res => (
+                          <button key={res} onClick={() => setStats({...stats, result: res})} className={`py-3 rounded-xl font-bold text-sm border-2 transition-all ${stats.result === res ? res === 'Win' ? 'bg-emerald-600 border-emerald-600 text-white' : res === 'Loss' ? 'bg-red-600 border-red-600 text-white' : 'bg-zinc-600 border-zinc-600 text-white' : 'bg-transparent border-zinc-700 text-zinc-400'}`}>{res.toUpperCase()}</button>
+                      ))}
+                  </div>
+                  <div className="flex items-center justify-between bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                      <div className="flex flex-col items-center gap-1">
+                          <span className="text-xs text-zinc-500 uppercase font-bold">Home</span>
+                          <div className="flex items-center gap-2"><button onClick={() => setStats({...stats, homeScore: Math.max(0, stats.homeScore - 1)})} className="h-8 w-8 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Minus size={14}/></button><span className="text-xl font-mono text-white w-6 text-center">{stats.homeScore}</span><button onClick={() => setStats({...stats, homeScore: stats.homeScore + 1})} className="h-8 w-8 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Plus size={14}/></button></div>
+                      </div>
+                      <span className="text-zinc-600 font-black text-xl">:</span>
+                      <div className="flex flex-col items-center gap-1">
+                          <span className="text-xs text-zinc-500 uppercase font-bold">Away</span>
+                          <div className="flex items-center gap-2"><button onClick={() => setStats({...stats, awayScore: Math.max(0, stats.awayScore - 1)})} className="h-8 w-8 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Minus size={14}/></button><span className="text-xl font-mono text-white w-6 text-center">{stats.awayScore}</span><button onClick={() => setStats({...stats, awayScore: stats.awayScore + 1})} className="h-8 w-8 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Plus size={14}/></button></div>
+                      </div>
+                  </div>
+                  <div className="h-px bg-zinc-800 my-4"></div>
+                  <div className="flex justify-between items-center bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                      <span className="text-white font-bold">Goals Scored</span>
+                      <div className="flex items-center gap-3"><button onClick={() => setStats({...stats, goals: Math.max(0, stats.goals - 1)})} className="h-8 w-8 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Minus size={14}/></button><span className="text-xl font-mono text-emerald-500 w-6 text-center">{stats.goals}</span><button onClick={() => setStats({...stats, goals: stats.goals + 1})} className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center"><Plus size={14}/></button></div>
+                  </div>
+                  <div className="flex justify-between items-center bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                      <span className="text-white font-bold">Assists</span>
+                      <div className="flex items-center gap-3"><button onClick={() => setStats({...stats, assists: Math.max(0, stats.assists - 1)})} className="h-8 w-8 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Minus size={14}/></button><span className="text-xl font-mono text-emerald-500 w-6 text-center">{stats.assists}</span><button onClick={() => setStats({...stats, assists: stats.assists + 1})} className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center"><Plus size={14}/></button></div>
+                  </div>
+                  {isDefensive && (
+                      <div className="flex justify-between items-center bg-zinc-950 p-4 rounded-xl border border-zinc-800" onClick={() => setStats({...stats, cleanSheet: !stats.cleanSheet})}>
+                          <span className="text-white font-bold">Clean Sheet</span>
+                          <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${stats.cleanSheet ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-600'}`}>{stats.cleanSheet && <CheckCircle2 size={16} className="text-black" />}</div>
+                      </div>
+                  )}
+              </div>
+              <div className="flex gap-3"><button onClick={() => setIsGameLogOpen(false)} className="flex-1 bg-zinc-800 text-white font-bold py-3 rounded-xl">Cancel</button><button onClick={() => saveGameStats(stats, matchDate)} className="flex-1 bg-emerald-600 text-white font-bold py-3 rounded-xl">Save Match</button></div>
+          </div>
+      </div>
+    );
+};
+
+// --- Main Application ---
+
+export default function App() {
+  const [view, setView] = useState('dashboard'); 
+  const [exercises, setExercises] = useState([
+    { id: 1, name: 'Barbell/DB Bench Press', category: 'Push' },
+    { id: 2, name: 'Squat', category: 'Legs' },
+    { id: 3, name: 'Deadlift', category: 'Pull' },
+    { id: 4, name: 'Overhead Press', category: 'Push' },
+    { id: 5, name: 'Pull-Ups', category: 'Pull' },
+    { id: 6, name: 'Dumbbell Row', category: 'Pull' },
+    { id: 7, name: 'Lunge', category: 'Legs' },
+    { id: 8, name: 'Front Squat', category: 'Legs' },
+    { id: 9, name: 'Split Squat', category: 'Legs' },
+    { id: 10, name: 'Plank', category: 'Core' },
+    { id: 11, name: 'Landmine Press', category: 'Push' },
+    { id: 12, name: 'Cable Woodchopper', category: 'Core' },
+    { id: 13, name: 'Med Ball Side Toss', category: 'Core' },
+    { id: 14, name: 'Explosive Push-Ups', category: 'Push' },
+    { id: 15, name: 'Box Jumps', category: 'Legs' },
+    { id: 16, name: 'Nordic Hamstring Curl', category: 'Legs' },
+    { id: 17, name: 'Copenhagen Plank', category: 'Core' },
+    { id: 18, name: 'Drill: Stop & Return', category: 'Agility' },
+    { id: 19, name: 'Drill: Inside-Out', category: 'Agility' },
+    { id: 20, name: 'Drill: Short & Sharp', category: 'Agility' },
+    { id: 21, name: 'Drill: Diagonal Sprint', category: 'Cardio' },
+    { id: 22, name: 'Drill: Lap Runner', category: 'Endurance' }
+  ]);
+  const [history, setHistory] = useState([]);
+  const [matchHistory, setMatchHistory] = useState([]); 
+  const [activeWorkout, setActiveWorkout] = useState(null);
+  const [pinnedRoutine, setPinnedRoutine] = useState(null); // Add Pinned Routine State
+  const [currentBlock, setCurrentBlock] = useState(null); // Add Current Block State
+  const [workoutTimer, setWorkoutTimer] = useState(0);
+  const [profile, setProfile] = useState({ name: "Elite Player", age: 21, height: "180cm", position: "Midfielder", foot: "Right", club: "Project Elite FC" });
+  const [seasonStats, setSeasonStats] = useState({ apps: 0, goals: 0, assists: 0, cleanSheets: 0, wins: 0, draws: 0, losses: 0 });
+  const [isGameLogOpen, setIsGameLogOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false); // State for Onboarding
+
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('fitTrack_history');
+    if (savedHistory) setHistory(JSON.parse(savedHistory));
+    
+    const savedMatchHistory = localStorage.getItem('fitTrack_matchHistory');
+    if (savedMatchHistory) setMatchHistory(JSON.parse(savedMatchHistory));
+    
+    const savedProfile = localStorage.getItem('fitTrack_profile');
+    if (savedProfile) {
+        setProfile(JSON.parse(savedProfile));
+    } else {
+        setShowOnboarding(true); // Trigger onboarding if no profile exists
+    }
+
+    const savedStats = localStorage.getItem('fitTrack_stats');
+    if (savedStats) setSeasonStats(JSON.parse(savedStats));
+    
+    const savedBlock = localStorage.getItem('fitTrack_currentBlock'); // Load current block
+    if (savedBlock) setCurrentBlock(JSON.parse(savedBlock));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('fitTrack_history', JSON.stringify(history));
+    localStorage.setItem('fitTrack_matchHistory', JSON.stringify(matchHistory));
+    localStorage.setItem('fitTrack_profile', JSON.stringify(profile));
+    localStorage.setItem('fitTrack_stats', JSON.stringify(seasonStats));
+    
+    // Save current block
+    if (currentBlock) {
+      localStorage.setItem('fitTrack_currentBlock', JSON.stringify(currentBlock));
+    } else {
+      localStorage.removeItem('fitTrack_currentBlock');
+    }
+  }, [history, matchHistory, profile, seasonStats, currentBlock]);
+
+  useEffect(() => {
+    let interval;
+    if (activeWorkout) {
+      interval = setInterval(() => setWorkoutTimer(t => t + 1), 1000);
+    } else {
+      setWorkoutTimer(0);
+    }
+    return () => clearInterval(interval);
+  }, [activeWorkout]);
+
+  const startWorkout = () => {
+    setActiveWorkout({ id: Date.now(), startTime: new Date().toISOString(), name: 'New Workout', exercises: [] });
+    setView('active');
+  };
+
+  const startRoutine = (routine) => {
+    const routineExercises = routine.exercises.map(rEx => {
+      const exerciseDef = exercises.find(e => e.name === rEx.name) || { name: rEx.name, category: 'General' };
+      return {
+        ...exerciseDef,
+        ...rEx, // Merge specific routine props like hideWeight
+        instanceId: Date.now() + Math.random(),
+        sets: Array(rEx.sets).fill(0).map((_, i) => ({ id: Date.now() + Math.random() + i, weight: 0, reps: rEx.reps, completed: false }))
+      };
+    });
+    setActiveWorkout({ id: Date.now(), startTime: new Date().toISOString(), name: routine.name, exercises: routineExercises });
+    setView('active');
+  };
+
+  const finishWorkout = () => {
+    setHistory([{ ...activeWorkout, endTime: new Date().toISOString(), duration: workoutTimer }, ...history]);
+    setActiveWorkout(null);
+    setWorkoutTimer(0);
+    setView('dashboard');
+  };
+
+  const forceCancelWorkout = () => {
+      setActiveWorkout(null);
+      setWorkoutTimer(0);
+      setView('dashboard');
+  };
+
+  const saveGameStats = (stats, matchDate) => {
+      const newMatch = { id: Date.now(), date: matchDate, ...stats };
+      setMatchHistory([newMatch, ...matchHistory]);
+      setSeasonStats(prev => ({
+          apps: prev.apps + 1,
+          goals: prev.goals + stats.goals,
+          assists: prev.assists + stats.assists,
+          cleanSheets: prev.cleanSheets + (stats.cleanSheet ? 1 : 0),
+          wins: prev.wins + (stats.result === 'Win' ? 1 : 0),
+          draws: prev.draws + (stats.result === 'Draw' ? 1 : 0),
+          losses: prev.losses + (stats.result === 'Loss' ? 1 : 0)
+      }));
+      setIsGameLogOpen(false);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30">
+      <div className="max-w-md mx-auto min-h-screen relative shadow-2xl shadow-black bg-zinc-950">
+        <main className="p-4 pt-4">
+          {view === 'dashboard' && <DashboardView profile={profile} seasonStats={seasonStats} history={history} setIsGameLogOpen={setIsGameLogOpen} startWorkout={startWorkout} startRoutine={startRoutine} currentBlock={currentBlock} setCurrentBlock={setCurrentBlock} setView={setView} />}
+          {view === 'profile' && <ProfileView profile={profile} setProfile={setProfile} seasonStats={seasonStats} setView={setView} />}
+          {view === 'active' && <ActiveWorkoutView activeWorkout={activeWorkout} setActiveWorkout={setActiveWorkout} workoutTimer={workoutTimer} finishWorkout={finishWorkout} forceCancelWorkout={forceCancelWorkout} exercises={exercises} />}
+          {view === 'history' && <HistoryView history={history} setHistory={setHistory} setView={setView} formatDate={formatDate} />}
+          {view === 'data' && <DataView history={history} matchHistory={matchHistory} seasonStats={seasonStats} profile={profile} setView={setView} formatDate={formatDate} />}
+          {view === 'workouts' && <WorkoutsView startRoutine={startRoutine} setView={setView} setCurrentBlock={setCurrentBlock} />}
+        </main>
+
+        {isGameLogOpen && <GameLogModal saveGameStats={saveGameStats} setIsGameLogOpen={setIsGameLogOpen} isDefensive={DEFENSIVE_POSITIONS.includes(profile.position)} />}
+        {showOnboarding && <OnboardingModal profile={profile} setProfile={setProfile} onComplete={() => setShowOnboarding(false)} />}
+
+        {view !== 'active' && (
+          <div className="fixed bottom-0 left-0 right-0 bg-zinc-950/90 backdrop-blur-md border-t border-zinc-800 pb-safe z-50">
+            <div className="max-w-md mx-auto flex justify-between px-6 py-3 items-end">
+              <button onClick={() => setView('dashboard')} className={`flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${view === 'dashboard' ? 'text-emerald-500' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                <LayoutDashboard size={24} />
+                Home
+              </button>
+              <button onClick={() => setView('workouts')} className={`flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${view === 'workouts' ? 'text-emerald-500' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                <Dumbbell size={24} />
+                Plans
+              </button>
+              <div className="relative -top-5">
+                <button 
+                  onClick={startWorkout}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white p-4 rounded-full shadow-lg border-4 border-zinc-950 transition-transform active:scale-95"
+                >
+                  <Plus size={28} />
+                </button>
+              </div>
+              <button onClick={() => setView('data')} className={`flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${view === 'data' ? 'text-emerald-500' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                <BarChart2 size={24} />
+                Stats
+              </button>
+              <button onClick={() => setView('profile')} className={`flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${view === 'profile' ? 'text-emerald-500' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                <User size={24} />
+                Profile
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
